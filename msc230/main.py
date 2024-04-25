@@ -14,8 +14,11 @@ def main():
 
     raw_path = 'data/raw/'
     processed_path = 'data/processed'
+    png_path = 'data/png'
 
-    process_matlab_txt(root_path, raw_path, processed_path)
+    # process_matlab_txt(root_path, raw_path, processed_path)
+
+    processed_to_png(root_path, processed_path, png_path)
 
     return
 
@@ -54,6 +57,31 @@ def process_matlab_txt(root_path, raw_path, processed_path):
     return
 
 
+def processed_to_png(root_path, processed_path, png_path):
+    # print(root_path, png_path)
+
+    npy_files_list = sorted(os.listdir(os.path.join(root_path, processed_path)))
+    print(npy_files_list)
+
+
+    global_min = np.load(os.path.join(root_path, processed_path, npy_files_list[0])).min()
+    global_max = np.load(os.path.join(root_path, processed_path, npy_files_list[0])).max()
+    
+    # print(global_min, global_max)
+
+    for i in npy_files_list:
+        local_min = np.load(os.path.join(root_path, processed_path, i)).min()
+        local_max = np.load(os.path.join(root_path, processed_path, i)).max()
+
+        if local_min < global_min:
+            global_min = local_min
+
+        if local_max > global_max:
+            global_max = local_max
+
+    print(global_min, global_max)
+
+    return
 
 
 
