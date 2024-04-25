@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "msc230"
+version = "0.1.0"
+description = "MSC230 computer vision tools"
+authors = ["Shuravin Mikhail"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.10.12"
+numpy = "^1.26.4"
+pandas = "^2.2.2"
+pillow = "^10.3.0"
+scikit-learn = "^1.4.2"
+matplotlib = "^3.8.4"
+torch = "^2.3.0"
+black = "^24.4.1"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+pre-commit = "^3.7.0"
+pytest = "^8.1.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
