@@ -5,6 +5,12 @@ import pickle
 from sklearn.preprocessing import MinMaxScaler
 from PIL import Image as im
 
+import cv2
+# from skimage import data, img_as_float
+from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import mean_squared_error as mse
+from skimage.metrics import peak_signal_noise_ratio as psnr
+
 
 def main():
     # add ascii fancy header
@@ -34,7 +40,9 @@ def main():
 
     # processed_to_png(root_path, processed_path, scalers_path, png_path)
 
-    inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path)
+    # inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path)
+
+    get_metrics(root_path, results_path, png_path)
 
     return
 
@@ -183,7 +191,7 @@ def processed_to_png(root_path, processed_path, scalers_path, png_path):
 
 def inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path):
     print('INVERSE TRANSFORM!')
-    print(*os.listdir(os.path.join(root_path, results_path)), sep='\n')
+    # print(*os.listdir(os.path.join(root_path, results_path)), sep='\n')
     print('Total files in [results] folder:', len(os.listdir(os.path.join(root_path, results_path))))
     
     scaler_0255_init = pickle.load(open(os.path.join(root_path, scalers_path, 'scaler_0255_init.sav'), 'rb'))
@@ -215,6 +223,31 @@ def inverse_transform_to_txt(root_path, png_path, results_path, output_path, sca
         # break
 
     print('Done.')
+
+    return
+
+def get_metrics(root_path, results_path, png_path):
+    print('METRICS!')
+
+    # argPARSE filename/number here ??
+
+    results_list = sorted(os.listdir(os.path.join(root_path, results_path)))
+    print(*results_list, sep='\n')
+    print('Metrics for:', results_list[0])
+    number = results_list[0].split('_')[1]
+
+    ground_big = cv2.imread(os.path.join(root_path, png_path, f'ground_{number}.png'), cv2.IMREAD_GRAYSCALE)
+    upscaled_bic = cv2.imread(os.path.join(root_path, png_path, f'bicubic_{number}.png'), cv2.IMREAD_GRAYSCALE)
+    upscaled_nn = cv2.imread(os.path.join(root_path, results_path, f'compr_{number}_out.png'), cv2.IMREAD_GRAYSCALE)
+
+    print('SSIM BIC:', ssim(ground_big, upscaled_bic))
+    print('SSIM NN: ', ssim(ground_big, upscaled_nn))
+
+    print('PSNR BIC:', psnr(ground_big, upscaled_bic))
+    print('PSNR NN: ', psnr(ground_big, upscaled_nn))
+
+    # print(mse(ground_big, upscaled_bic))
+    # print(mse(ground_big, upscaled_nn))
 
     return
 
