@@ -24,6 +24,7 @@ def main():
     scalers_path = 'data/scalers/'
     models_path = 'models/'
     results_path = 'results/'
+    output_path = 'output/'
 
     # get_metrics
     # save_to_(polarplot?)
@@ -33,7 +34,7 @@ def main():
 
     # processed_to_png(root_path, processed_path, scalers_path, png_path)
 
-    inverse_transform_to_txt(root_path, png_path, results_path, scalers_path)
+    inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path)
 
     return
 
@@ -180,7 +181,7 @@ def processed_to_png(root_path, processed_path, scalers_path, png_path):
     return
 
 
-def inverse_transform_to_txt(root_path, png_path, results_path, scalers_path):
+def inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path):
     print('INVERSE TRANSFORM!')
     print(*os.listdir(os.path.join(root_path, results_path)), sep='\n')
     print('Total files in [results] folder:', len(os.listdir(os.path.join(root_path, results_path))))
@@ -202,14 +203,14 @@ def inverse_transform_to_txt(root_path, png_path, results_path, scalers_path):
         img_upscaled_nn = np.array(im.open(os.path.join(root_path, results_path, f'compr_{number}_out.png')))#[:,:,0] # here was -- convert L !
 
 
-        print(f'{file_name} -> to output/*.txt')
+        print(f'{file_name} -> {output_path}***.txt')
 
-        # # inverse transform and export to TXT
+        # inverse transform and export to TXT
 
-        np.savetxt(os.path.join(root_path, f'output/ground_big_{number}.txt'), scaler_0255_init.inverse_transform(img_ground_big), delimiter=',')
+        np.savetxt(os.path.join(root_path, output_path, f'ground_big_{number}.txt'), scaler_0255_init.inverse_transform(img_ground_big), delimiter=',')
         # np.savetxt(f'maps_output/ground_small_00{i}.txt', scaler_0255_compr.inverse_transform(img_ground_small), delimiter=',')
-        np.savetxt(os.path.join(root_path, f'output/upscaled_bicubic_{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_bic), delimiter=',')
-        np.savetxt(os.path.join(root_path, f'output/upscaled_nn_{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_nn), delimiter=',')
+        np.savetxt(os.path.join(root_path, output_path, f'upscaled_bicubic_{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_bic), delimiter=',')
+        np.savetxt(os.path.join(root_path, output_path, f'upscaled_nn_{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_nn), delimiter=',')
 
         # break
 
