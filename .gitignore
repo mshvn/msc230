@@ -2,6 +2,8 @@
 
 data/*
 models/*
+output/*
+results/*
 
 !data/.gitkeep
 !models/.gitkeep

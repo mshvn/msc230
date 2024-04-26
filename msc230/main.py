@@ -22,10 +22,18 @@ def main():
     processed_path = 'data/processed/'
     png_path = 'data/png/'
     scalers_path = 'data/scalers/'
+    models_path = 'models/'
+    results_path = 'results/'
+
+    # get_metrics
+    # save_to_(polarplot?)
+
 
     # process_matlab_txt(root_path, raw_path, processed_path)
 
-    processed_to_png(root_path, processed_path, scalers_path, png_path)
+    # processed_to_png(root_path, processed_path, scalers_path, png_path)
+
+    inverse_transform_to_txt(root_path, png_path, results_path, scalers_path)
 
     return
 
@@ -171,6 +179,49 @@ def processed_to_png(root_path, processed_path, scalers_path, png_path):
 
     return
 
+
+def inverse_transform_to_txt(root_path, png_path, results_path, scalers_path):
+    print('IN INV TRANS!')
+    print(*os.listdir(os.path.join(root_path, results_path)), sep='\n')
+    print('Total files in [results] folder:', len(os.listdir(os.path.join(root_path, results_path))))
+    
+    scaler_0255_init = pickle.load(open(os.path.join(root_path, scalers_path, 'scaler_0255_init.sav'), 'rb'))
+    # scaler_0255_compr = pickle.load(open('/home/mike/MLDS/Dataset_export/scalers/scaler_0255_compr.sav', 'rb'))
+    print((scaler_0255_init))
+
+    results_list = os.listdir(os.path.join(root_path, results_path))
+
+    for filename in results_list:
+        number = filename.split('_')[1]
+        
+        break
+
+    return
+
+    NUM = '00'
+
+    # scaler_0255_init = pickle.load(open(os.path.join(root_path, scalers_path, 'scaler_0255_init.sav'), 'rb'))
+    # # scaler_0255_compr = pickle.load(open('/home/mike/MLDS/Dataset_export/scalers/scaler_0255_compr.sav', 'rb'))
+    # print((scaler_0255_init))
+
+
+    img_ground_big = np.array(im.open(os.path.join(root_path, png_path, f'ground_0{NUM}.png')))#[:,:,0]
+    # img_ground_small = np.array(im.open(f'dataset_png/compr_0{NUM}.png'))#[:,:,0]
+    img_upscaled_bic = np.array(im.open(os.path.join(root_path, png_path, f'bicubic_0{NUM}.png')))#[:,:,0]
+    img_upscaled_nn = np.array(im.open(os.path.join(root_path, results_path, f'compr_0{NUM}_out.png')))#[:,:,0] # here was -- convert L !
+
+
+    print(img_ground_big.shape, img_upscaled_bic.shape, img_upscaled_nn.shape)
+
+    # # inverse transform and export to TXT
+
+    np.savetxt(os.path.join(root_path, f'output/ground_big_0{NUM}.txt'), scaler_0255_init.inverse_transform(img_ground_big), delimiter=',')
+    # np.savetxt(f'maps_output/ground_small_00{i}.txt', scaler_0255_compr.inverse_transform(img_ground_small), delimiter=',')
+
+    np.savetxt(os.path.join(root_path, f'output/upscaled_bicubic_0{NUM}.txt'), scaler_0255_init.inverse_transform(img_upscaled_bic), delimiter=',')
+    np.savetxt(os.path.join(root_path, f'output/upscaled_nn_0{NUM}.txt'), scaler_0255_init.inverse_transform(img_upscaled_nn), delimiter=',')
+
+    return
 
 
 if __name__ == "__main__":
