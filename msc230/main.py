@@ -181,7 +181,7 @@ def processed_to_png(root_path, processed_path, scalers_path, png_path):
 
 
 def inverse_transform_to_txt(root_path, png_path, results_path, scalers_path):
-    print('IN INVERSE TRANSFORM!')
+    print('INVERSE TRANSFORM!')
     print(*os.listdir(os.path.join(root_path, results_path)), sep='\n')
     print('Total files in [results] folder:', len(os.listdir(os.path.join(root_path, results_path))))
     
@@ -190,6 +190,8 @@ def inverse_transform_to_txt(root_path, png_path, results_path, scalers_path):
     # print((scaler_0255_init))
 
     results_list = os.listdir(os.path.join(root_path, results_path))
+
+    print('Working...')
 
     for file_name in results_list:
         number = file_name.split('_')[1]
@@ -200,21 +202,18 @@ def inverse_transform_to_txt(root_path, png_path, results_path, scalers_path):
         img_upscaled_nn = np.array(im.open(os.path.join(root_path, results_path, f'compr_{number}_out.png')))#[:,:,0] # here was -- convert L !
 
 
-        print(img_ground_big.shape, img_upscaled_bic.shape, img_upscaled_nn.shape)
+        print(f'{file_name} -> to output/*.txt')
 
         # # inverse transform and export to TXT
 
-        np.savetxt(os.path.join(root_path, f'output/ground_big_0{number}.txt'), scaler_0255_init.inverse_transform(img_ground_big), delimiter=',')
+        np.savetxt(os.path.join(root_path, f'output/ground_big_{number}.txt'), scaler_0255_init.inverse_transform(img_ground_big), delimiter=',')
         # np.savetxt(f'maps_output/ground_small_00{i}.txt', scaler_0255_compr.inverse_transform(img_ground_small), delimiter=',')
-        np.savetxt(os.path.join(root_path, f'output/upscaled_bicubic_0{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_bic), delimiter=',')
-        np.savetxt(os.path.join(root_path, f'output/upscaled_nn_0{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_nn), delimiter=',')
+        np.savetxt(os.path.join(root_path, f'output/upscaled_bicubic_{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_bic), delimiter=',')
+        np.savetxt(os.path.join(root_path, f'output/upscaled_nn_{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_nn), delimiter=',')
 
-        break
+        # break
 
-    return
-
-
-
+    print('Done.')
 
     return
 
