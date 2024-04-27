@@ -15,6 +15,7 @@ polar/*
 results/*
 !results/.gitkeep
 
+msc230/__pycache__/*
 
 memo.txt
 

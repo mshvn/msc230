@@ -1,21 +1,22 @@
-import numpy as np
+# import numpy as np
 import os
-import pickle
+# import pickle
 
-from sklearn.preprocessing import MinMaxScaler
-import matplotlib.pyplot as plt
+# from sklearn.preprocessing import MinMaxScaler
+# import matplotlib.pyplot as plt
 
-from tqdm import tqdm
-import fnmatch
+# from tqdm import tqdm
+# import fnmatch
 
-from PIL import Image as im
-import cv2
+# from PIL import Image as im
+# import cv2
 
-# from skimage import data, img_as_float
-from skimage.metrics import structural_similarity as ssim
 # from skimage.metrics import mean_squared_error as mse
-from skimage.metrics import peak_signal_noise_ratio as psnr
+# from skimage.metrics import structural_similarity as ssim
+# from skimage.metrics import peak_signal_noise_ratio as psnr
 
+from utils import get_metrics, plot_polar
+from process import process_matlab_txt, processed_to_png, inverse_transform_to_txt
 
 def main():
     # add ascii fancy header
@@ -40,277 +41,12 @@ def main():
 
 
     # process_matlab_txt(root_path, raw_path, processed_path)
-
     # processed_to_png(root_path, processed_path, scalers_path, png_path)
-
     # inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path)
-
     # get_metrics(root_path, results_path, png_path)
-
     plot_polar(root_path, results_path, polar_path)
 
     return
-
-
-def process_matlab_txt(root_path, raw_path, processed_path):
-    # find best way to use join and OS path...
-    # raw_path = 'data/raw/'
-    # processed_path = 'data/processed'
-    raw_files_list = os.listdir(os.path.join(root_path, raw_path))
-
-    print(f'\nFiles to process ({len(raw_files_list)} files):\n')
-    print(*raw_files_list, sep='\n')
-
-    raw_files_list_enumerated = sorted(list(enumerate(raw_files_list)))
-
-    print(f'\nSaving processed files to: {processed_path}/*.npy\n')
-    for i, j in raw_files_list_enumerated:
-
-        df = np.loadtxt(os.path.join(root_path, raw_path, f'{j}'), skiprows=3)
-        
-        #TODO exeptions, when shape is wrong
-        if df[:, 1:1444:2].shape[0] <= 721:
-            # display(df[:, 1:1444:2].shape)
-            outfile = df[:, 1:1444:2]
-            print(i+1, j, outfile.shape)
-
-            with open((os.path.join(root_path, processed_path) + '/%03d.npy'%i), 'wb') as f:
-                np.save(f, outfile)
-
-        else:
-            # display(df[::2, 1:1444:2].shape)
-            outfile = df[::2, 1:1444:2]
-            print(i+1, j, outfile.shape)
-
-            with open((os.path.join(root_path, processed_path) + '/%03d.npy'%i), 'wb') as v:
-                np.save(v, outfile)
-    return
-
-
-def processed_to_png(root_path, processed_path, scalers_path, png_path):
-    # print(root_path, png_path)
-
-    npy_files_list = sorted(os.listdir(os.path.join(root_path, processed_path)))
-    print(npy_files_list)
-
-
-    global_min = np.load(os.path.join(root_path, processed_path, npy_files_list[0])).min()
-    global_max = np.load(os.path.join(root_path, processed_path, npy_files_list[0])).max()
-    
-    # print(global_min, global_max)
-
-    for i in npy_files_list:
-        local_min = np.load(os.path.join(root_path, processed_path, i)).min()
-        local_max = np.load(os.path.join(root_path, processed_path, i)).max()
-
-        if local_min < global_min:
-            global_min = local_min
-
-        if local_max > global_max:
-            global_max = local_max
-
-    print('Global MIN, MAX:', global_min, global_max)
-
-
-    # MINMAX Transform with global min, max
-    scaler_0255_init = MinMaxScaler(feature_range = (0, 255), clip=False)
-    scaler_0255_compr = MinMaxScaler(feature_range = (0, 255), clip=False)
-
-    # open INITIAL for scaler
-    init_mm = np.load(os.path.join(root_path, processed_path, npy_files_list[0]))
-    init_mm = init_mm[:-1,:-2] # attention ! cutting to 720x720 !
-    print(init_mm.shape)
-    print('init pic before:', init_mm.min(), init_mm.max())
-
-    init_mm[0,0] = (global_min)# - 1)
-    init_mm[4,0] = (global_max)# + 1)
-    print('init pic after:', init_mm.min(), init_mm.max())
-
-
-    # cut to COMPRESSED for scaler
-    compr_mm = init_mm[::4, ::4] # compressing/slicing to 180x180
-    print(compr_mm.shape)
-    print('compr pic after:', compr_mm.min(), compr_mm.max())
-
-    # flatten/reshape, fit
-    scaler_0255_init.fit(init_mm.reshape(-1, 1))
-    scaler_0255_compr.fit(compr_mm.reshape(-1, 1))
-
-    pickle.dump(scaler_0255_init, open(os.path.join(root_path, scalers_path, 'scaler_0255_init.sav'), 'wb'))
-    pickle.dump(scaler_0255_compr, open(os.path.join(root_path, scalers_path, 'scaler_0255_compr.sav'), 'wb'))
-
-
-    # SAVE to PNG version 2 (global min max)
-
-
-    for i, j in enumerate(npy_files_list):
-
-        print(i, j)
-        
-        #INITIAL
-        init_pic = np.load(os.path.join(root_path, processed_path, j))
-        init_pic = init_pic[:-1,:-2] # attention ! cutting to 720x720 !
-        # scaler_0255_init.fit(init_pic)
-
-        print('shape 0, MIN MAX:', init_pic.shape, init_pic.min(), init_pic.max())
-        out_ground_pic_np = scaler_0255_init.transform(init_pic.reshape(-1,1)) # reshape to vector
-        out_ground_pic_np = out_ground_pic_np.reshape((720,720)) # reshape to matrix 
-
-        print('shape 1, MIN MAX:', out_ground_pic_np.shape, out_ground_pic_np.min(), out_ground_pic_np.max())
-        # out_ground_pic_np = np.repeat(out_ground_pic_np[None], 3, axis=0)
-        # print('shape 2, MIN MAX:', out_ground_pic_np.shape, out_ground_pic_np.min(), out_ground_pic_np.max())
-        print()
-        out_ground_pic = im.fromarray(np.uint8(out_ground_pic_np), 'L')
-        # out_gound_pic.save('dataset_png/ground_%03d.png'%i)
-        out_ground_pic.save(os.path.join(root_path, png_path) + 'ground_%03d.png'%i)
-        
-        
-        #COMPRESSED
-        out_compr_pic_np = out_ground_pic_np[::4, ::4] # compressing/slicing to 180x180
-        # scaler_0255_compr.fit(compr_pic)
-        print('shape 1 compr, MIN MAX:', out_compr_pic_np.shape, out_compr_pic_np.min(), out_compr_pic_np.max())
-        
-        # out_compr_pic_np = scaler_0255_compr.transform(compr_pic.reshape(-1,1))
-        # out_compr_pic_np = out_compr_pic_np.reshape((180, 180))
-
-        # out_compr_pic_np = np.repeat(out_compr_pic_np[None], 3, axis=0)
-        out_compr_pic = im.fromarray(np.uint8(out_compr_pic_np), 'L')
-        # out_compr_pic.save('dataset_png/compr_%03d.png'%i)
-        out_compr_pic.save(os.path.join(root_path, png_path) + 'compr_%03d.png'%i)
-
-        
-        #BICUBIC
-        # out_resized_pic = skim_resize(out_compr_pic, (dim1,dim2)) # mode -- different versions of resize
-        # out_resized_pic_np = scaler_0255_init.transform(resized_pic)
-        # out_resized_pic_np = np.repeat(out_resized_pic_np[None], 3, axis=0)
-        # out_resized_pic = im.fromarray(np.uint8(np.ascontiguousarray(out_resized_pic_np.transpose(1,2,0))), 'RGB')
-        out_resized_pic = out_compr_pic.resize((720,720), im.BICUBIC)
-        # out_resized_pic.save('dataset_png/bicubic_%03d.png'%i)
-        out_resized_pic.save(os.path.join(root_path, png_path) + 'bicubic_%03d.png'%i)
-
-        # break
-
-
-    return
-
-
-def inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path):
-    print('INVERSE TRANSFORM!')
-    # print(*os.listdir(os.path.join(root_path, results_path)), sep='\n')
-    print('Total files in [results] folder:', len(os.listdir(os.path.join(root_path, results_path))))
-    
-    scaler_0255_init = pickle.load(open(os.path.join(root_path, scalers_path, 'scaler_0255_init.sav'), 'rb'))
-    # scaler_0255_compr = pickle.load(open('/home/mike/MLDS/Dataset_export/scalers/scaler_0255_compr.sav', 'rb'))
-    # print((scaler_0255_init))
-
-    results_list = os.listdir(os.path.join(root_path, results_path))
-
-    print('Working...')
-
-    for file_name in results_list:
-        number = file_name.split('_')[1]
-
-        img_ground_big = np.array(im.open(os.path.join(root_path, png_path, f'ground_{number}.png')))#[:,:,0]
-        # img_ground_small = np.array(im.open(f'dataset_png/compr_0{NUM}.png'))#[:,:,0]
-        img_upscaled_bic = np.array(im.open(os.path.join(root_path, png_path, f'bicubic_{number}.png')))#[:,:,0]
-        img_upscaled_nn = np.array(im.open(os.path.join(root_path, results_path, f'compr_{number}_out.png')))#[:,:,0] # here was -- convert L !
-
-
-        print(f'{file_name} -> {output_path}***.txt')
-
-        # inverse transform and export to TXT
-
-        np.savetxt(os.path.join(root_path, output_path, f'ground_big_{number}.txt'), scaler_0255_init.inverse_transform(img_ground_big), delimiter=',')
-        # np.savetxt(f'maps_output/ground_small_00{i}.txt', scaler_0255_compr.inverse_transform(img_ground_small), delimiter=',')
-        np.savetxt(os.path.join(root_path, output_path, f'upscaled_bicubic_{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_bic), delimiter=',')
-        np.savetxt(os.path.join(root_path, output_path, f'upscaled_nn_{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_nn), delimiter=',')
-
-        # break
-
-    print('Done.')
-
-    return
-
-
-def get_metrics(root_path, results_path, png_path):
-    print('METRICS!')
-
-    # argPARSE filename/number here ??
-
-    results_list = sorted(os.listdir(os.path.join(root_path, results_path)))
-    print(*results_list, sep='\n')
-    print('Metrics for:', results_list[0])
-    number = results_list[0].split('_')[1]
-
-    ground_big = cv2.imread(os.path.join(root_path, png_path, f'ground_{number}.png'), cv2.IMREAD_GRAYSCALE)
-    upscaled_bic = cv2.imread(os.path.join(root_path, png_path, f'bicubic_{number}.png'), cv2.IMREAD_GRAYSCALE)
-    upscaled_nn = cv2.imread(os.path.join(root_path, results_path, f'compr_{number}_out.png'), cv2.IMREAD_GRAYSCALE)
-
-    print('SSIM BIC:', ssim(ground_big, upscaled_bic))
-    print('SSIM NN: ', ssim(ground_big, upscaled_nn))
-
-    print('PSNR BIC:', psnr(ground_big, upscaled_bic))
-    print('PSNR NN: ', psnr(ground_big, upscaled_nn))
-
-    # print(mse(ground_big, upscaled_bic))
-    # print(mse(ground_big, upscaled_nn))
-
-    return
-
-def plot_polar(root_path, results_path, polar_path):
-    print('POLAR PLOT!')
-
-    # get list of files, filter only PNG
-    results_list = sorted(os.listdir(os.path.join(root_path, results_path)))
-    results_list = fnmatch.filter(results_list, '*.png')
-
-    print(*results_list, sep='\n')
-    print(f'Going to process {len(results_list)} PNG files in [{results_path}] folder.')
-
-
-    user_input = input('Do you want to continue? (y/n): ')
-    if user_input.lower() not in ['yes', 'y', 'yep']:
-        return
-        
-    else:
-        for result in results_list:
-            image = np.array(im.open(os.path.join(root_path, results_path, result)))
-            # print(image.shape)
-
-            picture = np.zeros(([2000, 2000]), dtype=np.int16)
-            theta_steps = np.arange(0, 361, 0.5)[:-2]
-
-            # print(picture.shape)
-            # print(len(theta_steps), theta_steps[-5:])
-
-
-            for step in tqdm(range(len(image)), ncols=90, desc=f'Converting [{result}] '):
-                # print('THETA STEPS:', theta_steps[step])
-                # print(df.iloc[i])
-                r = 0
-                for val in image[step]:
-
-                    # print(f'Value {val} in radius {r}, angle {angle_steps[step]}')
-                    r = r + 1
-
-                    x = r * np.cos(np.deg2rad(theta_steps[step])) + 999#len(r_steps)-3#1999
-                    y = r * np.sin(np.deg2rad(theta_steps[step])) + 999#len(r_steps)-3#1999
-
-                    # print('X Y:', x, y)
-                    picture[round(x)][round(y)] = val
-
-                    # if theta_steps[step] % 30 == 0:
-                    #     print('*', end='') 
-            
-            plt.figure(figsize=(20,20))
-            plt.imshow(picture)
-            plt.savefig(os.path.join(root_path, polar_path, 'polar_figure_' + result))
-
-            out_imgage = im.fromarray(np.uint8(picture), 'L')
-            out_imgage.save(os.path.join(root_path, polar_path, 'polar_image_' + result))
-
-        print('Done.')
-        return
 
 
 if __name__ == "__main__":
