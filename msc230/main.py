@@ -6,13 +6,14 @@ from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
+import fnmatch
 
 from PIL import Image as im
 import cv2
 
 # from skimage import data, img_as_float
 from skimage.metrics import structural_similarity as ssim
-from skimage.metrics import mean_squared_error as mse
+# from skimage.metrics import mean_squared_error as mse
 from skimage.metrics import peak_signal_noise_ratio as psnr
 
 
@@ -35,8 +36,7 @@ def main():
     models_path = 'models/'
     results_path = 'results/'
     output_path = 'output/'
-
-    # # # TODO save_to_(polarplot?)
+    polar_path = 'polar/'
 
 
     # process_matlab_txt(root_path, raw_path, processed_path)
@@ -47,7 +47,7 @@ def main():
 
     # get_metrics(root_path, results_path, png_path)
 
-    plot_polar(root_path, results_path, output_path)
+    plot_polar(root_path, results_path, polar_path)
 
     return
 
@@ -257,53 +257,60 @@ def get_metrics(root_path, results_path, png_path):
 
     return
 
-
-def plot_polar(root_path, results_path, output_path):
+def plot_polar(root_path, results_path, polar_path):
     print('POLAR PLOT!')
+
+    # get list of files, filter only PNG
     results_list = sorted(os.listdir(os.path.join(root_path, results_path)))
+    results_list = fnmatch.filter(results_list, '*.png')
+
     print(*results_list, sep='\n')
-
-    image = np.array(im.open(os.path.join(root_path, results_path, results_list[0])))
-    print(image.shape)
-
-    picture = np.zeros(([2000, 2000]), dtype=np.int16)
-    theta_steps = np.arange(0, 361, 0.5)[:-2]
-
-    print(picture.shape)
-    print(len(theta_steps), theta_steps[-5:])
+    print(f'Going to process {len(results_list)} PNG files in [{results_path}] folder.')
 
 
-    for step in tqdm(range(len(image)), ncols=90, desc='Working'):
-        # print('THETA STEPS:', theta_steps[step])
-        # print(df.iloc[i])
-        r = 0
-        for val in image[step]:
+    user_input = input('Do you want to continue? (y/n): ')
+    if user_input.lower() not in ['yes', 'y', 'yep']:
+        return
+        
+    else:
+        for result in results_list:
+            image = np.array(im.open(os.path.join(root_path, results_path, result)))
+            # print(image.shape)
 
-            # print(f'Value {val} in radius {r}, angle {angle_steps[step]}')
-            r = r + 1
+            picture = np.zeros(([2000, 2000]), dtype=np.int16)
+            theta_steps = np.arange(0, 361, 0.5)[:-2]
 
-            x = r * np.cos(np.deg2rad(theta_steps[step])) + 999#len(r_steps)-3#1999
-            y = r * np.sin(np.deg2rad(theta_steps[step])) + 999#len(r_steps)-3#1999
-
-            # print('X Y:', x, y)
-            picture[round(x)][round(y)] = val
-
-            # if theta_steps[step] % 30 == 0:
-            #     print('*', end='') 
-    
-
-    plt.figure(figsize=(20,20))
-    plt.imshow(picture)
-    plt.savefig(os.path.join(root_path, 'polar/image.png'))
+            # print(picture.shape)
+            # print(len(theta_steps), theta_steps[-5:])
 
 
-    out_pic = im.fromarray(np.uint8(picture), 'L')
-    out_pic.save(os.path.join(root_path, 'polar/image_2.png'))
+            for step in tqdm(range(len(image)), ncols=90, desc=f'Converting [{result}] '):
+                # print('THETA STEPS:', theta_steps[step])
+                # print(df.iloc[i])
+                r = 0
+                for val in image[step]:
 
-    print('Done.')
+                    # print(f'Value {val} in radius {r}, angle {angle_steps[step]}')
+                    r = r + 1
 
+                    x = r * np.cos(np.deg2rad(theta_steps[step])) + 999#len(r_steps)-3#1999
+                    y = r * np.sin(np.deg2rad(theta_steps[step])) + 999#len(r_steps)-3#1999
 
-    return
+                    # print('X Y:', x, y)
+                    picture[round(x)][round(y)] = val
+
+                    # if theta_steps[step] % 30 == 0:
+                    #     print('*', end='') 
+            
+            plt.figure(figsize=(20,20))
+            plt.imshow(picture)
+            plt.savefig(os.path.join(root_path, polar_path, 'polar_figure_' + result))
+
+            out_imgage = im.fromarray(np.uint8(picture), 'L')
+            out_imgage.save(os.path.join(root_path, polar_path, 'polar_image_' + result))
+
+        print('Done.')
+        return
 
 
 if __name__ == "__main__":
