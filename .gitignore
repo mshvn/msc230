@@ -1,12 +1,20 @@
 **/.DS_Store
 
 data/*
-models/*
-output/*
-results/*
-
 !data/.gitkeep
+
+models/*
 !models/.gitkeep
+
+output/*
+!output/.gitkeep
+
+polar/*
+!polar/.gitkeep
+
+results/*
+!results/.gitkeep
+
 
 memo.txt
 

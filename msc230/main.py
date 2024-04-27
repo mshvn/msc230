@@ -3,9 +3,13 @@ import os
 import pickle
 
 from sklearn.preprocessing import MinMaxScaler
-from PIL import Image as im
+import matplotlib.pyplot as plt
 
+from tqdm import tqdm
+
+from PIL import Image as im
 import cv2
+
 # from skimage import data, img_as_float
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import mean_squared_error as mse
@@ -32,8 +36,7 @@ def main():
     results_path = 'results/'
     output_path = 'output/'
 
-    # get_metrics
-    # save_to_(polarplot?)
+    # # # TODO save_to_(polarplot?)
 
 
     # process_matlab_txt(root_path, raw_path, processed_path)
@@ -42,7 +45,9 @@ def main():
 
     # inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path)
 
-    get_metrics(root_path, results_path, png_path)
+    # get_metrics(root_path, results_path, png_path)
+
+    plot_polar(root_path, results_path, output_path)
 
     return
 
@@ -226,6 +231,7 @@ def inverse_transform_to_txt(root_path, png_path, results_path, output_path, sca
 
     return
 
+
 def get_metrics(root_path, results_path, png_path):
     print('METRICS!')
 
@@ -248,6 +254,54 @@ def get_metrics(root_path, results_path, png_path):
 
     # print(mse(ground_big, upscaled_bic))
     # print(mse(ground_big, upscaled_nn))
+
+    return
+
+
+def plot_polar(root_path, results_path, output_path):
+    print('POLAR PLOT!')
+    results_list = sorted(os.listdir(os.path.join(root_path, results_path)))
+    print(*results_list, sep='\n')
+
+    image = np.array(im.open(os.path.join(root_path, results_path, results_list[0])))
+    print(image.shape)
+
+    picture = np.zeros(([2000, 2000]), dtype=np.int16)
+    theta_steps = np.arange(0, 361, 0.5)[:-2]
+
+    print(picture.shape)
+    print(len(theta_steps), theta_steps[-5:])
+
+
+    for step in tqdm(range(len(image)), ncols=90, desc='Working'):
+        # print('THETA STEPS:', theta_steps[step])
+        # print(df.iloc[i])
+        r = 0
+        for val in image[step]:
+
+            # print(f'Value {val} in radius {r}, angle {angle_steps[step]}')
+            r = r + 1
+
+            x = r * np.cos(np.deg2rad(theta_steps[step])) + 999#len(r_steps)-3#1999
+            y = r * np.sin(np.deg2rad(theta_steps[step])) + 999#len(r_steps)-3#1999
+
+            # print('X Y:', x, y)
+            picture[round(x)][round(y)] = val
+
+            # if theta_steps[step] % 30 == 0:
+            #     print('*', end='') 
+    
+
+    plt.figure(figsize=(20,20))
+    plt.imshow(picture)
+    plt.savefig(os.path.join(root_path, 'polar/image.png'))
+
+
+    out_pic = im.fromarray(np.uint8(picture), 'L')
+    out_pic.save(os.path.join(root_path, 'polar/image_2.png'))
+
+    print('Done.')
+
 
     return
 
