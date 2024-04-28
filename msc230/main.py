@@ -1,5 +1,6 @@
 # import numpy as np
 import os
+import argparse
 # import pickle
 
 # from sklearn.preprocessing import MinMaxScaler
@@ -18,7 +19,7 @@ import os
 from utils import get_metrics, plot_polar
 from process import process_matlab_txt, processed_to_png, inverse_transform_to_txt
 
-def main():
+def main(action):
     # add ascii fancy header
     print('\
     ████████████████████████████████████\n\
@@ -29,25 +30,43 @@ def main():
     root_path = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
     print('\nRoot folder path:', root_path)
 
+    print('Selected action:', action)
+
+    # models_path = 'models/'
     # / added in end (?):
     raw_path = 'data/raw/'
     processed_path = 'data/processed/'
     png_path = 'data/png/'
     scalers_path = 'data/scalers/'
-    models_path = 'models/'
     results_path = 'results/'
     output_path = 'output/'
     polar_path = 'polar/'
 
+    action = action.lower()
 
-    # process_matlab_txt(root_path, raw_path, processed_path)
-    # processed_to_png(root_path, processed_path, scalers_path, png_path)
-    # inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path)
-    # get_metrics(root_path, results_path, png_path)
-    plot_polar(root_path, results_path, polar_path)
-
+    if action in ['processmat', 'processm', 'procm', 'pm']:
+        process_matlab_txt(root_path, raw_path, processed_path)
+    elif action in ['topng', 'png', 'top', 'tp']:
+        processed_to_png(root_path, processed_path, scalers_path, png_path)
+    elif action in ['inverse', 'inv', 'invt','invtrans', 'it']:
+        inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path)
+    elif action in ['metrics', 'metr', 'met', 'ms']:
+        get_metrics(root_path, results_path, png_path)
+    elif action in ['plotpolar', 'plot', 'polar', 'pp']:
+        plot_polar(root_path, results_path, polar_path)
+    elif action in ['full', 'fullf', 'fullforward', 'forward', 'ff']:
+        process_matlab_txt(root_path, raw_path, processed_path)
+        processed_to_png(root_path, processed_path, scalers_path, png_path)
+    else:
+        print(f'Wrong action provided ({action}).')
+    
     return
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(prog = 'python msc230/main.py', 
+                                     description = 'Actions parser for MSC230 tools.\
+                                        Please enter action.')
+    parser.add_argument('action', help='valid actions: pm, tp, it, ms, pp, ff')
+    args = parser.parse_args()
+    main(args.action)

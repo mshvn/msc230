@@ -24,27 +24,33 @@ def get_metrics(root_path, results_path, png_path):
 
     print('METRICS!')
 
-    # argPARSE filename/number here ??
-
     results_list = sorted(os.listdir(os.path.join(root_path, results_path)))
     results_list = fnmatch.filter(results_list, '*.png')
 
     print(*results_list, sep='\n')
-    print('Metrics for:', results_list[0])
-    number = results_list[0].split('_')[1]
+    print(f'Going to print SSIM and PSNR metrics for {len(results_list)} files in [{results_path}] folder.')
 
-    ground_big = cv2.imread(os.path.join(root_path, png_path, f'ground_{number}.png'), cv2.IMREAD_GRAYSCALE)
-    upscaled_bic = cv2.imread(os.path.join(root_path, png_path, f'bicubic_{number}.png'), cv2.IMREAD_GRAYSCALE)
-    upscaled_nn = cv2.imread(os.path.join(root_path, results_path, f'compr_{number}_out.png'), cv2.IMREAD_GRAYSCALE)
+    user_input = input('Do you want to continue? (y/n): ')
+    if user_input.lower() not in ['yes', 'y', 'yep']:
+        return
+    
+    for result in results_list:
 
-    print('SSIM BIC:', ssim(ground_big, upscaled_bic))
-    print('SSIM NN: ', ssim(ground_big, upscaled_nn))
+        print('\nMetrics for:', result)
+        number = result.split('_')[1]
 
-    print('PSNR BIC:', psnr(ground_big, upscaled_bic))
-    print('PSNR NN: ', psnr(ground_big, upscaled_nn))
+        ground_big = cv2.imread(os.path.join(root_path, png_path, f'ground_{number}.png'), cv2.IMREAD_GRAYSCALE)
+        upscaled_bic = cv2.imread(os.path.join(root_path, png_path, f'bicubic_{number}.png'), cv2.IMREAD_GRAYSCALE)
+        upscaled_nn = cv2.imread(os.path.join(root_path, results_path, f'compr_{number}_out.png'), cv2.IMREAD_GRAYSCALE)
 
-    # print(mse(ground_big, upscaled_bic))
-    # print(mse(ground_big, upscaled_nn))
+        print('SSIM BIC:', ssim(ground_big, upscaled_bic))
+        print('SSIM NN: ', ssim(ground_big, upscaled_nn))
+
+        print('PSNR BIC:', psnr(ground_big, upscaled_bic))
+        print('PSNR NN: ', psnr(ground_big, upscaled_nn))
+
+        # print(mse(ground_big, upscaled_bic))
+        # print(mse(ground_big, upscaled_nn))
 
     return
 
