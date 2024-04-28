@@ -3,24 +3,27 @@ import os
 import pickle
 
 from sklearn.preprocessing import MinMaxScaler
-# import matplotlib.pyplot as plt
-
-# from tqdm import tqdm
-# import fnmatch
 
 from PIL import Image as im
-# import cv2
 import fnmatch
 
-# from skimage.metrics import mean_squared_error as mse
-# from skimage.metrics import structural_similarity as ssim
-# from skimage.metrics import peak_signal_noise_ratio as psnr
 
 
-def process_matlab_txt(root_path, raw_path, processed_path):
-    # find best way to use join and OS path...
-    # raw_path = 'data/raw/'
-    # processed_path = 'data/processed'
+def process_matlab_txt(root_path, raw_path, processed_path) -> None:
+    '''
+    Process (and reshape) Matlab matrices, from txt files to npy format.
+    Saves npy files to [processed] folder.
+
+    Args:
+        root_path (str) : absolute path to root folder of the project
+        raw_path (str) : relative path to [raw] folder
+        processed_path (str) : relative path to [processed] folder
+    
+    Returns:
+        Nothing
+
+    '''    
+    
     raw_files_list = os.listdir(os.path.join(root_path, raw_path))
 
     print(f'\nFiles to process ({len(raw_files_list)} files):\n')
@@ -52,16 +55,27 @@ def process_matlab_txt(root_path, raw_path, processed_path):
     return
 
 
-def processed_to_png(root_path, processed_path, scalers_path, png_path):
-    # print(root_path, png_path)
+def processed_to_png(root_path, processed_path, scalers_path, png_path) -> None:
+    '''
+    Converts processed NPY files to PNG images.
+    MinMaxScaler to [0;255], saves scalers to [scalers] folder.
+
+    Args:
+        root_path (str) : absolute path to root folder of the project
+        processed_path (str) : relative path to [processed] folder
+        scalers_path (str) : relative path to [scalers] folder
+        png_path (str) : relative path to [png_path] folder
+    
+    Returns:
+        Nothing
+
+    ''' 
 
     npy_files_list = sorted(os.listdir(os.path.join(root_path, processed_path)))
     print(npy_files_list)
 
-
     global_min = np.load(os.path.join(root_path, processed_path, npy_files_list[0])).min()
     global_max = np.load(os.path.join(root_path, processed_path, npy_files_list[0])).max()
-    
     # print(global_min, global_max)
 
     for i in npy_files_list:
@@ -106,8 +120,6 @@ def processed_to_png(root_path, processed_path, scalers_path, png_path):
 
 
     # SAVE to PNG version 2 (global min max)
-
-
     for i, j in enumerate(npy_files_list):
 
         print(i, j)
@@ -137,7 +149,6 @@ def processed_to_png(root_path, processed_path, scalers_path, png_path):
         
         # out_compr_pic_np = scaler_0255_compr.transform(compr_pic.reshape(-1,1))
         # out_compr_pic_np = out_compr_pic_np.reshape((180, 180))
-
         # out_compr_pic_np = np.repeat(out_compr_pic_np[None], 3, axis=0)
         out_compr_pic = im.fromarray(np.uint8(out_compr_pic_np), 'L')
         # out_compr_pic.save('dataset_png/compr_%03d.png'%i)
@@ -159,14 +170,28 @@ def processed_to_png(root_path, processed_path, scalers_path, png_path):
     return
 
 
-def inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path):
+def inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path) -> None:
+    '''
+    Perfoms the inverse transformation, saves to the [output] folder.
+    Output format is Matlab txt. 
+
+    Args:
+        root_path (str) : absolute path to root folder of the project
+        png_path (str) : relative path to [png_path] folder
+        results_path (str) : relative path to [results] folder
+        output_path (str) : relative path to [output] folder
+        scalers_path (str) : relative path to [scalers] folder
+    
+    Returns:
+        Nothing
+
+    ''' 
+
     print('INVERSE TRANSFORM!')
-    # print(*os.listdir(os.path.join(root_path, results_path)), sep='\n')
     print('Total files in [results] folder:', len(os.listdir(os.path.join(root_path, results_path))))
     
     scaler_0255_init = pickle.load(open(os.path.join(root_path, scalers_path, 'scaler_0255_init.sav'), 'rb'))
     # scaler_0255_compr = pickle.load(open('/home/mike/MLDS/Dataset_export/scalers/scaler_0255_compr.sav', 'rb'))
-    # print((scaler_0255_init))
 
     results_list = os.listdir(os.path.join(root_path, results_path))
     results_list = fnmatch.filter(results_list, '*.png')
@@ -181,17 +206,13 @@ def inverse_transform_to_txt(root_path, png_path, results_path, output_path, sca
         img_upscaled_bic = np.array(im.open(os.path.join(root_path, png_path, f'bicubic_{number}.png')))#[:,:,0]
         img_upscaled_nn = np.array(im.open(os.path.join(root_path, results_path, f'compr_{number}_out.png')))#[:,:,0] # here was -- convert L !
 
-
         print(f'{file_name} -> {output_path}***.txt')
 
         # inverse transform and export to TXT
-
         np.savetxt(os.path.join(root_path, output_path, f'ground_big_{number}.txt'), scaler_0255_init.inverse_transform(img_ground_big), delimiter=',')
         # np.savetxt(f'maps_output/ground_small_00{i}.txt', scaler_0255_compr.inverse_transform(img_ground_small), delimiter=',')
         np.savetxt(os.path.join(root_path, output_path, f'upscaled_bicubic_{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_bic), delimiter=',')
         np.savetxt(os.path.join(root_path, output_path, f'upscaled_nn_{number}.txt'), scaler_0255_init.inverse_transform(img_upscaled_nn), delimiter=',')
-
-        # break
 
     print('Done.')
 

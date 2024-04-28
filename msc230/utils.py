@@ -1,8 +1,6 @@
 import numpy as np
 import os
-# import pickle
 
-# from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
@@ -17,12 +15,21 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 
 
 
-def get_metrics(root_path, results_path, png_path):
+def get_metrics(root_path, results_path, png_path) -> None:
     '''
-    Basic metrics
+    Prints basic metrics (SSIM, PSNR).
+
+    Args:
+        root_path (str) : absolute path to root folder of the project
+        results_path (str) : relative path to [results] folder
+        png_path (str) : relative path to [png] folder
+    
+    Returns:
+        Nothing
+
     '''
 
-    print('METRICS!')
+    print('METRICS')
 
     results_list = sorted(os.listdir(os.path.join(root_path, results_path)))
     results_list = fnmatch.filter(results_list, '*.png')
@@ -55,14 +62,24 @@ def get_metrics(root_path, results_path, png_path):
     return
 
 
-def plot_polar(root_path, results_path, polar_path):
+def plot_polar(root_path, results_path, polar_path) -> None:
     '''
-    Save to polar image
+    Converts images from cartesian to polar.
+    Saves images to [polar] folder.
+
+    Args:
+        root_path (str) : absolute path to root folder of the project
+        results_path (str) : relative path to [results] folder
+        polar_path (str) : relative path to [polar] folder
+    
+    Returns:
+        Nothing
+
     '''
 
-    print('POLAR PLOT!')
+    print('PLOT POLAR')
 
-    # get list of files, filter only PNG
+    # get list of files, filter PNG only
     results_list = sorted(os.listdir(os.path.join(root_path, results_path)))
     results_list = fnmatch.filter(results_list, '*.png')
 

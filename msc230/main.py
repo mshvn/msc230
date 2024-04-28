@@ -19,7 +19,14 @@ import argparse
 from utils import get_metrics, plot_polar
 from process import process_matlab_txt, processed_to_png, inverse_transform_to_txt
 
-def main(action):
+def main(action) -> None:
+    '''
+    Computer Vision tools for MSC230 Super-Resolution project.
+    
+    Basic usage:
+    * * *
+    
+    '''
     # add ascii fancy header
     print('\
     ████████████████████████████████████\n\
@@ -44,17 +51,17 @@ def main(action):
 
     action = action.lower()
 
-    if action in ['processmat', 'processm', 'procm', 'pm']:
+    if action in ['process_matlab', 'process_mat', 'process', 'pm']:
         process_matlab_txt(root_path, raw_path, processed_path)
-    elif action in ['topng', 'png', 'top', 'tp']:
+    elif action in ['to_png', 'png', 'top', 'tp']:
         processed_to_png(root_path, processed_path, scalers_path, png_path)
-    elif action in ['inverse', 'inv', 'invt','invtrans', 'it']:
+    elif action in ['inverse_transform', 'inv_trans', 'invtrans','invt', 'it']:
         inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path)
-    elif action in ['metrics', 'metr', 'met', 'ms']:
+    elif action in ['metrics', 'metric', 'met', 'ms']:
         get_metrics(root_path, results_path, png_path)
     elif action in ['plotpolar', 'plot', 'polar', 'pp']:
         plot_polar(root_path, results_path, polar_path)
-    elif action in ['full', 'fullf', 'fullforward', 'forward', 'ff']:
+    elif action in ['full', 'fullforward', 'forward', 'ff']:
         process_matlab_txt(root_path, raw_path, processed_path)
         processed_to_png(root_path, processed_path, scalers_path, png_path)
     else:
