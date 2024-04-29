@@ -32,9 +32,7 @@ def get_metrics(root_path, results_path, png_path) -> None:
     results_list = fnmatch.filter(results_list, "*.png")
 
     print(*results_list, sep="\n")
-    print(
-        f"Going to print SSIM and PSNR metrics for {len(results_list)} files in [{results_path}] folder."
-    )
+    print(f"Going to print SSIM and PSNR metrics for {len(results_list)} file(s) in [{results_path}] folder.")
 
     user_input = input("Do you want to continue? (y/n): ")
     if user_input.lower() not in ["yes", "y", "yep"]:
@@ -101,17 +99,11 @@ def plot_polar(root_path, results_path, polar_path) -> None:
     else:
         for result in results_list:
             image = np.array(im.open(os.path.join(root_path, results_path, result)))
-            # print(image.shape)
 
             picture = np.zeros(([2000, 2000]), dtype=np.int16)
             theta_steps = np.arange(0, 361, 0.5)[:-2]
 
-            # print(picture.shape)
-            # print(len(theta_steps), theta_steps[-5:])
-
-            for step in tqdm(
-                range(len(image)), ncols=90, desc=f"Converting [{result}] "
-            ):
+            for step in tqdm(range(len(image)), ncols=90, desc=f"Converting [{result}] "):
                 # print('THETA STEPS:', theta_steps[step])
                 # print(df.iloc[i])
                 r = 0
@@ -119,28 +111,17 @@ def plot_polar(root_path, results_path, polar_path) -> None:
 
                     # print(f'Value {val} in radius {r}, angle {angle_steps[step]}')
                     r = r + 1
-
-                    x = (
-                        r * np.cos(np.deg2rad(theta_steps[step])) + 999
-                    )  # len(r_steps)-3#1999
-                    y = (
-                        r * np.sin(np.deg2rad(theta_steps[step])) + 999
-                    )  # len(r_steps)-3#1999
-
+                    x = (r * np.cos(np.deg2rad(theta_steps[step])) + 999)
+                    y = (r * np.sin(np.deg2rad(theta_steps[step])) + 999)
                     # print('X Y:', x, y)
                     picture[round(x)][round(y)] = val
-
-                    # if theta_steps[step] % 30 == 0:
-                    #     print('*', end='')
 
             plt.figure(figsize=(20, 20))
             plt.imshow(picture)
             plt.savefig(os.path.join(root_path, polar_path, "polar_figure_" + result))
 
             out_imgage = im.fromarray(np.uint8(picture), "L")
-            out_imgage.save(
-                os.path.join(root_path, polar_path, "polar_image_" + result)
-            )
+            out_imgage.save(os.path.join(root_path, polar_path, "polar_image_" + result))
 
         print("Done.")
         return

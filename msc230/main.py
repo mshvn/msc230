@@ -10,25 +10,45 @@ def main(action) -> None:
     Computer Vision tools for MSC230 Super-Resolution project.
 
     Basic usage:
-    * * *
+    1. The magnetic field map files (Matlab matrices, txt format) 
+       must be located in the [data/raw] directory.
+    2. Use "python msc230/main.py [action]" to start the program.
+    3. Valid actions:
+
+        - process_matlab / pm : 
+            Process (and reshape) Matlab matrices.
+
+        - to_png / tp : 
+            Convert processed NPY files to PNG images.
+
+        - inverse_transform / it : 
+            Perfom the inverse transformation.
+
+        - metrics / ms : 
+            Print basic metrics.
+
+        - plotpolar / pp : 
+            Convert images from cartesian to polar.
+
+        - forward / ff : 
+            Run "process_matlab", then run "to_png"
 
     """
-    # add ascii fancy header
-    print(
-        "\
+
+    print("\
     ████████████████████████████████████\n\
     █▄─▀█▀─▄█─▄▄▄▄█─▄▄▄─█▀▄▄▀█▄▄▄░█─▄▄─█\n\
     ██─█▄█─██▄▄▄▄─█─███▀██▀▄███▄▄░█─██─█\n\
-    ▀▄▄▄▀▄▄▄▀▄▄▄▄▄▀▄▄▄▄▄▀▄▄▄▄▀▄▄▄▄▀▄▄▄▄▀"
-    )
+    ▀▄▄▄▀▄▄▄▀▄▄▄▄▄▀▄▄▄▄▄▀▄▄▄▄▀▄▄▄▄▀▄▄▄▄▀")
 
+
+    # absolute path to root folder of the project
     root_path = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
     print("\nRoot folder path:", root_path)
 
     print("Selected action:", action)
 
     # models_path = 'models/'
-    # / added in end (?):
     raw_path = "data/raw/"
     processed_path = "data/processed/"
     png_path = "data/png/"
@@ -44,14 +64,12 @@ def main(action) -> None:
     elif action in ["to_png", "png", "top", "tp"]:
         processed_to_png(root_path, processed_path, scalers_path, png_path)
     elif action in ["inverse_transform", "inv_trans", "invtrans", "invt", "it"]:
-        inverse_transform_to_txt(
-            root_path, png_path, results_path, output_path, scalers_path
-        )
+        inverse_transform_to_txt(root_path, png_path, results_path, output_path, scalers_path)
     elif action in ["metrics", "metric", "met", "ms"]:
         get_metrics(root_path, results_path, png_path)
     elif action in ["plotpolar", "plot", "polar", "pp"]:
         plot_polar(root_path, results_path, polar_path)
-    elif action in ["full", "fullforward", "forward", "ff"]:
+    elif action in ["forward", "full", "fullforward", "ff"]:
         process_matlab_txt(root_path, raw_path, processed_path)
         processed_to_png(root_path, processed_path, scalers_path, png_path)
     else:
