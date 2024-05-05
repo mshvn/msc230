@@ -1,7 +1,11 @@
 **/.DS_Store
 
-data/
-!data/.gitkeep
+# data/
+# !data/.gitkeep
+data/png/
+data/processed/
+data/raw/
+data/scalers/
 
 !data/png/.gitkeep
 !data/processed/.gitkeep
