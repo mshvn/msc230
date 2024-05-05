@@ -1,3 +1,10 @@
-![banner](static/banner_03.png)
+![banner](static/banner_text.png)
 
-## Computer Vision tools for MSC230 project
+![HSE-MLDS22](https://img.shields.io/badge/HSE-MLDS22-blue)
+
+Набор утилит позволяет работать с изображениями карт магнитного поля.
+
+## Описание:
+
+Описание
+Описание
