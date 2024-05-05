@@ -3,6 +3,11 @@
 data/*
 !data/.gitkeep
 
+!data/png/.gitkeep
+!data/processed/.gitkeep
+!data/raw/.gitkeep
+!data/scalers/.gitkeep
+
 models/*
 !models/.gitkeep
 
