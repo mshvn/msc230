@@ -10,6 +10,11 @@ convert and preprocess them.
 
 Computer Vision tools for MSC230 Super-Resolution project.
 
+Start with:
+1. Clone the repository
+2. Create new Conda environment with Poetry
+3. Run 'poetry install'
+
 ## Basic usage:
 
 1. The magnetic field map files (Matlab matrices, txt format) 
