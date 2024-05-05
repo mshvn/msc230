@@ -1,3 +1,3 @@
-**(README will be provided)**
+![banner](static/banner.png)
 
-Computer Vision tools for MSC230 Super-Resolution project.
+## Computer Vision tools for MSC230 project
