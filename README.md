@@ -3,12 +3,11 @@
 ![HSE-MLDS22](https://img.shields.io/badge/HSE-MLDS22-blue)
 
 
-A set of utilities helps you work with magnetic field maps, 
-convert and preprocess them.
-
 ## Description:
 
 Computer Vision tools for MSC230 Super-Resolution project.
+A set of tools to help you work with magnetic field maps, 
+convert and preprocess them.
 
 Start with:
 1. Clone the repository
