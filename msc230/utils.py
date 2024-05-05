@@ -28,6 +28,7 @@ def get_metrics(root_path, results_path, png_path) -> None:
 
     print("METRICS")
 
+    # get list of files, filter PNG only
     results_list = sorted(os.listdir(os.path.join(root_path, results_path)))
     results_list = fnmatch.filter(results_list, "*.png")
 

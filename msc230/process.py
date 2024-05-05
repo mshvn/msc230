@@ -23,7 +23,11 @@ def process_matlab_txt(root_path, raw_path, processed_path) -> None:
 
     """
 
+    print('PROCESS MATLAB to NPY')
+
+    # get list of files, filter TXT only
     raw_files_list = os.listdir(os.path.join(root_path, raw_path))
+    raw_files_list = sorted(fnmatch.filter(raw_files_list, "*.txt"))
 
     print(f"\nFiles to process ({len(raw_files_list)} files):\n")
     print(*raw_files_list, sep="\n")
@@ -70,7 +74,11 @@ def processed_to_png(root_path, processed_path, scalers_path, png_path) -> None:
 
     """
 
+    print('PROCESS NPY to PNG')
+
+    # get list of files, filter NPY only
     npy_files_list = sorted(os.listdir(os.path.join(root_path, processed_path)))
+    npy_files_list = sorted(fnmatch.filter(npy_files_list, "*.npy"))
     print(*npy_files_list, sep='\n')
     print(f'Total {len(npy_files_list)} files.')
 
@@ -158,6 +166,7 @@ def inverse_transform_to_txt(root_path, png_path, results_path, output_path, sca
     scaler_0255_init = pickle.load(open(os.path.join(root_path, scalers_path, "scaler_0255_init.sav"), "rb"))
     # scaler_0255_compr = pickle.load(open('/home/mike/MLDS/Dataset_export/scalers/scaler_0255_compr.sav', 'rb'))
 
+    # get list of files, filter PNG only
     results_list = os.listdir(os.path.join(root_path, results_path))
     results_list = sorted(fnmatch.filter(results_list, "*.png"))
     print("Total files in [results] folder:", len(results_list))
