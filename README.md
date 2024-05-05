@@ -6,6 +6,7 @@
 ## Description:
 
 Computer Vision tools for MSC230 Super-Resolution project.
+
 A set of tools to help you work with magnetic field maps, 
 convert and preprocess them.
 
